@@ -12,6 +12,8 @@ class Tangible:
 
     def __init__(self, x, y, sprite):
         self.vec = [0, 0]       # Vector de movimiento del objeto
+        self.mom_x = 0          # Momento horizontal
+        self.mom_y = 0          # Momento vertical
         self.sprite = sprite    # Sprite del objeto
         self.box = pygame.Rect(x, y, sprite.get_width(), sprite.get_height())
 
@@ -28,8 +30,8 @@ class Tangible:
         for box in box_list:
             if self.box.colliderect(box):
                 boxes_hit.append(box)
-        return box
+        return boxes_hit
 
-    def update(self):
+    def update(self, box_list):
         pass
 

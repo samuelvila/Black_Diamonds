@@ -1,5 +1,4 @@
 import pygame
-
 import var
 
 
@@ -27,12 +26,13 @@ class Map:
 
     def render(self, frame):
         self.tile_hit = []
-        y = 8
+        y = 0
         for row in self.tile_map:
             x = 0
             for column in row:
                 if column != 0:
-                    frame.blit(self.tile_set[column-1], (x*var.TILE_SIZE, y*var.TILE_SIZE))
-                    self.tile_hit.append(pygame.Rect(x*var.TILE_SIZE, y*var.TILE_SIZE, var.TILE_SIZE, var.TILE_SIZE))
+                    frame.blit(self.tile_set[column-1], (x * var.TILE_SIZE, y * var.TILE_SIZE+8))
+                    self.tile_hit.append(pygame.Rect(x * var.TILE_SIZE, y * var.TILE_SIZE+8,
+                                                     var.TILE_SIZE, var.TILE_SIZE))
                 x += 1
             y += 1

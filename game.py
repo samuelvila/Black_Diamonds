@@ -30,31 +30,35 @@ class Game:
         self.map = map.Map()
         self.clock = pygame.time.Clock()
 
-    def drawObj(self, obj_list):
+    def drawObj(self, player, obj_list):
         """
         Dibuja todos los objetos de la lista
+        :param player:
         :param obj_list:
         :return:
         """
+        player.draw(self.frame)
         for obj in obj_list:
             obj.draw(self.frame)
 
     @staticmethod
-    def updateObj(obj_list):
+    def updateObj(player, obj_list, g_map):
         """
         Recorre toda la lista de objetos instanciados y los actualiza. Aqui se recorrera
         la lista de proyectiles y si algun proyectil esta entra en contacto con alguno de
         los objetos se llamara a la funcion 'take_damage'.
+        :param g_map:
+        :param player:
         :param obj_list:
         :return:
         """
+        player.update(g_map.tile_hit)
         for obj in obj_list:
             obj.update(obj_list)
 
     @staticmethod
-    def checkInput(player_input):
+    def checkInput(player, player_input):
         """
-
         :param player_input:
         :return:
         """
@@ -67,6 +71,8 @@ class Game:
                     player_input[0] = True
                 if event.key == pygame.K_d:
                     player_input[1] = True
+                if event.key == pygame.K_w:
+                    player.mom_y = player.j_spd
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
                     player_input[0] = False
@@ -75,40 +81,38 @@ class Game:
             # if event.type == pygame.K_SPACE:
             # if event.type == pygame.K_s:
 
-    @staticmethod
-    def applyInput(player, player_input):
-        """
-        :param player:
-        :param player_input:
-        :return:
-        """
-        if player_input[0]:
-            player.accelerate(-1)
-        if player_input[1]:
-            player.accelerate(1)
-
     # Metodo que lanza el bucle principal del juego
     def run(self):
         """
-
         :return:
         """
         # Cargamos los sprites
         load()
         # Creamos las variables necesarias para la ejecucion
         obj_list = []
-        player = Player(100, 50, 50, data.avatar, 10, 5)
+        player = Player(100, 50, 50, data.avatar, 10, 5, 5)
         player_input = [False, False]   # Izquierda, derecha
-        obj_list.append(player)
         while True:
-            self.frame.fill((0, 0, 0))
+            # Dibujamos en el frame el mapa y un fondo de color
+            self.frame.fill((100, 120, 210))
             self.map.render(self.frame)
-            self.drawObj(obj_list)
-            self.checkInput(player_input)
-            self.applyInput(player, player_input)
-            self.updateObj(obj_list)
+            # Dibujamos los objetos
+            self.drawObj(player, obj_list)
+            # Comprobamos el input del jugador
+            self.checkInput(player, player_input)
+            # Aplicamos el input del jugador
+            player.applyInput(player_input)
+            # Actualizamos los objetos
+            self.updateObj(player, obj_list, self.map)
+            """
+            Escalamos el frame (donde estamos dibujado) y lo escalamos en una ventana 
+            (display) mas grande. Esto nos permitira ademas cambiar con facilidad la 
+            resolucion (mas bien escalado, ya que vamos a trabajar con pixel-art)
+            """
             self.display.blit(pygame.transform.scale(self.frame, var.RES), (0, 0))
+            # Actualizamos la pantalla
             pygame.display.update()
+            # Limitamos el refresco de la pantalla
             self.clock.tick(var.CLK_TICKS)
 
 # class Backround:
