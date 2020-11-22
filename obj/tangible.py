@@ -17,10 +17,6 @@ class Tangible:
         self.sprite = sprite    # Sprite del objeto
         self.box = pygame.Rect(x, y, sprite.get_width(), sprite.get_height())
 
-    def draw(self, screen):
-        # Dibujamos el sprite del jugador donde este su caja de colisiones
-        screen.blit(self.sprite, (self.box.x, self.box.y))
-
     def fall(self):
         if self.vec[1] < 5:
             self.vec[1] += Tangible.grav
@@ -31,6 +27,10 @@ class Tangible:
             if self.box.colliderect(box):
                 boxes_hit.append(box)
         return boxes_hit
+
+    def draw(self, screen, scroll):
+        # Dibujamos el sprite del jugador donde este su caja de colisiones
+        screen.blit(self.sprite, (self.box.x + scroll[0], self.box.y + scroll[1]))
 
     def update(self, box_list):
         pass

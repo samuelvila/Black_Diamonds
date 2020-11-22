@@ -13,6 +13,7 @@ class Player(Tangible):
     # Constructor
     def __init__(self, hp, x, y, sprite, spd, j_spd):
         super().__init__(x, y, sprite)
+        self.box.width = 32             # Establecemos la anchura de la hitbos del jugador
         self.hp = hp                    # Puntos de vida del avatar
         self.spd = spd                  # Velocidad del avatar al moverse
         self.j_spd = j_spd              # Velocidad del avatar al saltar
@@ -113,6 +114,12 @@ class Player(Tangible):
                 self.box.top = box.bottom
                 coll_register[3] = True
         return coll_register
+
+    def draw(self, screen, scroll):
+        # Dibujamos el sprite del jugador donde este su caja de colisiones
+        # Como la Hitbox del jugador no coincide con su sprite, hay que dibujar el sprite
+        # con un offset
+        screen.blit(self.sprite, (self.box.x-8 - scroll[0], self.box.y - scroll[1]))
 
     def update(self, box_list):
         # Actualizo el avatar
