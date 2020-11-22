@@ -56,31 +56,6 @@ class Game:
         for obj in obj_list:
             obj.update(obj_list)
 
-    @staticmethod
-    def checkInput(player, player_input):
-        """
-        :param player_input:
-        :return:
-        """
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_a:
-                    player_input[0] = True
-                if event.key == pygame.K_d:
-                    player_input[1] = True
-                if event.key == pygame.K_w:
-                    player.mom_y = player.j_spd
-            if event.type == pygame.KEYUP:
-                if event.key == pygame.K_a:
-                    player_input[0] = False
-                if event.key == pygame.K_d:
-                    player_input[1] = False
-            # if event.type == pygame.K_SPACE:
-            # if event.type == pygame.K_s:
-
     # Metodo que lanza el bucle principal del juego
     def run(self):
         """
@@ -90,8 +65,7 @@ class Game:
         load()
         # Creamos las variables necesarias para la ejecucion
         obj_list = []
-        player = Player(100, 50, 50, data.avatar, 10, 5, 5)
-        player_input = [False, False]   # Izquierda, derecha
+        player = Player(100, 50, 50, data.avatar, 5, 6)
         while True:
             # Dibujamos en el frame el mapa y un fondo de color
             self.frame.fill((100, 120, 210))
@@ -99,9 +73,7 @@ class Game:
             # Dibujamos los objetos
             self.drawObj(player, obj_list)
             # Comprobamos el input del jugador
-            self.checkInput(player, player_input)
-            # Aplicamos el input del jugador
-            player.applyInput(player_input)
+            player.checkInput()
             # Actualizamos los objetos
             self.updateObj(player, obj_list, self.map)
             """

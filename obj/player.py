@@ -1,20 +1,23 @@
+import sys
+
 from obj.tangible import *
 
 
 class Player(Tangible):
-    inertia = 8
+    inertia = 10
     """
     Clase del avatar que controla el jugador. Aviso para navegantes: se va a usar POO como base de
     de todas las clases instanciables que hagamos.
     """
 
     # Constructor
-    def __init__(self, hp, x, y, sprite, m_spd, spd, j_spd):
+    def __init__(self, hp, x, y, sprite, spd, j_spd):
         super().__init__(x, y, sprite)
-        self.hp = hp  # Puntos de vida del avatar
-        self.spd = spd
-        self.m_spd = m_spd  # Velocidad maxima del avatar
-        self.j_spd = j_spd  # Velocidad del avatar al saltar
+        self.hp = hp                    # Puntos de vida del avatar
+        self.spd = spd                  # Velocidad del avatar al moverse
+        self.j_spd = j_spd              # Velocidad del avatar al saltar
+        self.air_time = 0               # Tiempo (en frames) que el jugador estuvo en el aire
+        self.input = [False, False]     # Array de los posibles inputs te tipo hold
 
     def take_damage(self, dam, diff):
         """
@@ -26,17 +29,34 @@ class Player(Tangible):
         """
         self.hp -= dam * diff
 
-    def applyInput(self, player_input):
+    def checkInput(self):
         """
-        Aplica el input del jugador llamando a los metodos de la clase player que modifican
-        el estado del objeto del jugador. Esto incluye acelerar, saltar, dispara, etc...
         :param player_input:
         :return:
         """
+        # Comprobamos que input nos esta dando el jugador
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_a:
+                    self.input[0] = True
+                if event.key == pygame.K_d:
+                    self.input[1] = True
+                if event.key == pygame.K_SPACE:
+                    if self.air_time < 6:
+                        self.mom_y = -self.j_spd
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_a:
+                    self.input[0] = False
+                if event.key == pygame.K_d:
+                    self.input[1] = False
+        # Aplicamos el input del jugador
         self.vec = [0, 0]
-        if player_input[0]:
+        if self.input[0]:
             self.vec[0] -= self.spd
-        if player_input[1]:
+        if self.input[1]:
             self.vec[0] += self.spd
         self.vec[1] += self.mom_y
         self.mom_y += self.grav
@@ -103,5 +123,8 @@ class Player(Tangible):
             pass
         if coll[2]:
             self.mom_y = 0
+            self.air_time = 0
+        else:
+            self.air_time += 1
         if coll[3]:
-            pass
+            self.mom_y = 0
