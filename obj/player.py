@@ -1,36 +1,30 @@
 import sys
+import pygame
+from obj.fisical import Fisical
 
-from obj.tangible import *
 
-
-class Player(Tangible):
-    inertia = 10
+class Player(Fisical):
     """
     Clase del avatar que controla el jugador. Aviso para navegantes: se va a usar POO como base de
     de todas las clases instanciables que hagamos.
-    """
+
+    Constantes de la clase jugador:"""
+    inertia = 10
+    HITBOX_SIZE = [32, 64]
 
     # Constructor
-    def __init__(self, hp, x, y, sprite, spd, j_spd):
-        super().__init__(x, y, sprite)
-        self.box.width = 32             # Establecemos la anchura de la hitbos del jugador
-        self.hp = hp                    # Puntos de vida del avatar
-        self.spd = spd                  # Velocidad del avatar al moverse
-        self.j_spd = j_spd              # Velocidad del avatar al saltar
-        self.air_time = 0               # Tiempo (en frames) que el jugador estuvo en el aire
-        self.input = [False, False]     # Array de los posibles inputs te tipo hold
+    def __init__(self, sprite, hp: int, spd: int, j_spd: int):
+        # Lo creamos con la anchura de la hitbox de finida
+        super().__init__(self.HITBOX_SIZE[0], self.HITBOX_SIZE[1], sprite, hp)
+        self.spd = spd  # Velocidad del avatar al moverse
+        self.j_spd = j_spd  # Velocidad del avatar al saltar
+        self.air_time = 0  # Tiempo (en frames) que el jugador estuvo en el aire
+        self.sht_halt = 0  # Tiempo (en frames) durante el que el jugador no podra disparar
+        # Array de los posibles estados
+        self.states = {"IDLE": False, "RUNNING_RIGHT": False, "RUNNING_LEFT": False,
+                       "SHOOTING": False, "JUMPING": False, "AIR_TIME": False, "LANDING": False}
 
-    def take_damage(self, dam, diff):
-        """
-        Esta funcion se llamara en cuanto el jugador reciba daño (es decir, esté dentro de un rect de
-        una instancia de una clase proyectil/explosion)
-        :param dam:
-        :param diff:
-        :return:
-        """
-        self.hp -= dam * diff
-
-    def checkInput(self):
+    def check_user_input(self):
         """
         :param player_input:
         :return:
@@ -42,27 +36,17 @@ class Player(Tangible):
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
-                    self.input[0] = True
+                    self.states["RUNNING_RIGHT"] = True
                 if event.key == pygame.K_d:
-                    self.input[1] = True
+                    self.states["RUNNING_LEFT"] = True
                 if event.key == pygame.K_SPACE:
                     if self.air_time < 6:
-                        self.mom_y = -self.j_spd
+                        self.mom[1] = -self.j_spd
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_a:
-                    self.input[0] = False
+                    self.states["RUNNING_RIGHT"] = False
                 if event.key == pygame.K_d:
-                    self.input[1] = False
-        # Aplicamos el input del jugador
-        self.vec = [0, 0]
-        if self.input[0]:
-            self.vec[0] -= self.spd
-        if self.input[1]:
-            self.vec[0] += self.spd
-        self.vec[1] += self.mom_y
-        self.mom_y += self.grav
-        if self.mom_y > self.inertia:
-            self.mom_y = self.inertia
+                    self.states["RUNNING_LEFT"] = False
 
     def move(self, box_list):
         """
@@ -93,45 +77,78 @@ class Player(Tangible):
         # Registro de los tipos de colisiones (derecha, izquierda, abajo, arriba)
         coll_register = [False, False, False, False]
         # Primero vamos a gestionar el movimiento en el eje x
-        self.box.x += self.vec[0]
+        self.box.x += self.mov[0]
         # Recogemos la lista de cjajas con las que ha colisionado el avatar
         boxes_hit = self.check_coll(box_list)
         for box in boxes_hit:
-            if self.vec[0] > 0:
+            if self.mov[0] > 0:
                 self.box.right = box.left
                 coll_register[0] = True
-            elif self.vec[0] < 0:
+            elif self.mov[0] < 0:
                 self.box.left = box.right
                 coll_register[1] = True
         # Ahora que tenemos el las colisiones en el eje x gestionadas, hacemos lo mismo con el eje y
-        self.box.y += self.vec[1]
+        self.box.y += self.mov[1]
         boxes_hit = self.check_coll(box_list)
         for box in boxes_hit:
-            if self.vec[1] > 0:
+            if self.mov[1] > 0:
                 self.box.bottom = box.top
                 coll_register[2] = True
-            elif self.vec[1] < 0:
+            elif self.mov[1] < 0:
                 self.box.top = box.bottom
                 coll_register[3] = True
         return coll_register
 
-    def draw(self, screen, scroll):
-        # Dibujamos el sprite del jugador donde este su caja de colisiones
-        # Como la Hitbox del jugador no coincide con su sprite, hay que dibujar el sprite
-        # con un offset
-        screen.blit(self.sprite, (self.box.x-8 - scroll[0], self.box.y - scroll[1]))
+    def apply_state(self):
+        """
 
-    def update(self, box_list):
-        # Actualizo el avatar
-        coll = self.move(box_list)
+        :return:
+        """
+        self.mov = [0, 0]
+        if self.state:
+            self.mov[0] -= self.spd
+        if self.input[1]:
+            self.mov[0] += self.spd
+        self.mov[1] += self.mom_y
+        self.mom[1] += self.grav
+        if self.mom[1] > self.inertia:
+            self.mom[1] = self.inertia
+
+    def jump(self):
+
+    def run(self):
+
+
+    def land(self):
+        self.mom[1] = 0
+        self.air_time = 0
+        self.sht_halt = 12
+
+    def shoot(self):
+        PASS
+
+    def manage_coll(self, coll):
         if coll[0]:
             pass
         if coll[1]:
             pass
         if coll[2]:
-            self.mom_y = 0
+            self.mom[1] = 0
             self.air_time = 0
         else:
             self.air_time += 1
         if coll[3]:
-            self.mom_y = 0
+            self.mom[1] = 0
+
+    def draw(self, screen, scroll):
+        # Dibujamos el sprite del jugador donde este su caja de colisiones
+        # Como la Hitbox del jugador no coincide con su sprite, hay que dibujar el sprite
+        # con un offset
+        screen.blit(self.sprite, (self.box.x - 8 - scroll[0], self.box.y - scroll[1]))
+
+    def update(self, box_list):
+        # Actualizo el movimiento del avatar y gestiono sus colisiones
+        coll = self.move(box_list)
+        self.manage_coll()
+        for state in self.states:
+

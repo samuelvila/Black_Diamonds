@@ -1,4 +1,5 @@
 import data
+import var
 from maps import map
 
 from obj.player import *
@@ -80,14 +81,14 @@ class Game:
         load()
         # Creamos las variables necesarias para la ejecucion
         obj_list = []
-        player = Player(100, 50, 50, data.avatar, 5, 6)
+        player = Player(data.avatar, 100, 5, 6)
         while True:
             # Dibujamos un fondo de color
             self.frame.fill((80, 110, 230))
             # Aplicamos el scroll
             scroll = self.scroll(player)
             # Comprobamos el input del jugador
-            player.checkInput()
+            player.check_user_input()
             # Actualizamos los objetos
             self.update(player, obj_list)
             # Dibujamos el frame

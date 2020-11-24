@@ -1,11 +1,11 @@
-from obj.tangible import *
+from obj.dinamic import Dinamic
 
 
-class Proyectile(Tangible):
+class Proyectile(Dinamic):
     """
     """
 
-    def __init__(self, x, y, sprite, vector, spd, dam):
+    def __init__(self, x: int, y: int, sprite, vector: [int, int], spd: float, dam: int):
         super().__init__(x, y, sprite)
         self.vector = vector
         self.spd = spd
@@ -14,9 +14,11 @@ class Proyectile(Tangible):
     def get_dam(self):
         return self.dam
 
-    def draw(self, screen):
-        screen.blit(self.sprite, (self.x, self.y))
+    def move(self):
+        self.box.x += self.spd * self.vector[0]
+        self.box.y += self.spd * self.vector[1]
 
-    def update(self):
-        self.x += self.spd * self.vector[0]
-        self.y += self.spd * self.vector[1]
+    def update(self, box_list):
+        self.move()
+
+
